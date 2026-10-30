@@ -1,4 +1,4 @@
-# Decision Schema
+# <img src="images/decision-schema.svg" alt="Decision Schema logo" width="40" height="40"> Decision Schema
 
 A portable Markdown agent and one JSON Schema for folder-defined decisions.
 The harness loads the persona, reads explicitly selected evidence, calls OpenAI
