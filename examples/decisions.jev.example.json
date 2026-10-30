@@ -1,0 +1,32 @@
+{
+  "$schema": "https://github.com/fbxai/decision-schema/decision.schema.json",
+  "version": 2,
+  "questions": {
+    "needs_review": {
+      "type": "noul",
+      "instructions": "Does the evidence describe an unresolved issue needing human review?",
+      "criteria": {
+        "true": "An unresolved issue needs human judgment.",
+        "false": "The issue is resolved or routine."
+      }
+    },
+    "owner": {
+      "type": "choice",
+      "instructions": "Which team should handle this issue?",
+      "criteria": {
+        "engineering": "Software defects and technical failures.",
+        "billing": "Charges, invoices, and refunds.",
+        "other": "Neither category applies or there is insufficient evidence."
+      }
+    },
+    "severity": {
+      "type": "score",
+      "instructions": "How severe is the issue?",
+      "criteria": [
+        "Cosmetic issue; normal work can continue.",
+        "Work is impaired, but a workaround is available.",
+        "Essential work is blocked with no workaround."
+      ]
+    }
+  }
+}

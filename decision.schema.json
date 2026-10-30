@@ -1,0 +1,405 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/fbxai/decision-schema/decision.schema.json",
+  "title": "Decision Schema",
+  "description": "Policy for .agents/decisions.json. Version 1 uses OpenAI-native question arrays; version 2 uses Jev-style named questions. The harness invokes the explicitly configured decision endpoint using the accompanying Markdown instructions. This schema validates policies, not API responses, and does not provide an executable runtime.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/nativeConfig"
+    },
+    {
+      "$ref": "#/$defs/jevConfig"
+    }
+  ],
+  "$defs": {
+    "text": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 1048576,
+      "pattern": "\\S"
+    },
+    "predicate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "type",
+        "instructions"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/text"
+        },
+        "type": {
+          "const": "predicate"
+        },
+        "instructions": {
+          "$ref": "#/$defs/text"
+        }
+      }
+    },
+    "choice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "type",
+        "instructions",
+        "choices"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/text"
+        },
+        "type": {
+          "const": "choice"
+        },
+        "instructions": {
+          "$ref": "#/$defs/text"
+        },
+        "choices": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 255,
+          "description": "Values must be unique, including their type; checked by the consuming harness.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "value",
+              "description"
+            ],
+            "properties": {
+              "value": {
+                "oneOf": [
+                  {
+                    "$ref": "#/$defs/text"
+                  },
+                  {
+                    "type": "boolean"
+                  }
+                ]
+              },
+              "description": {
+                "$ref": "#/$defs/text"
+              }
+            }
+          }
+        }
+      }
+    },
+    "score": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "type",
+        "instructions",
+        "levels"
+      ],
+      "properties": {
+        "name": {
+          "$ref": "#/$defs/text"
+        },
+        "type": {
+          "const": "score"
+        },
+        "instructions": {
+          "$ref": "#/$defs/text"
+        },
+        "levels": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 10,
+          "description": "Order lowest to highest. Labels must be unique; checked by the consuming harness.",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "label",
+              "description"
+            ],
+            "properties": {
+              "label": {
+                "$ref": "#/$defs/text"
+              },
+              "description": {
+                "$ref": "#/$defs/text"
+              }
+            }
+          }
+        }
+      }
+    },
+    "jsonValue": {
+      "description": "A JSON value nested within structured instructions or criteria.",
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "number",
+            "boolean",
+            "null"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        }
+      ]
+    },
+    "content": {
+      "description": "Text, structured JSON object or array, or an unspecified description (null).",
+      "anyOf": [
+        {
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        {
+          "type": "object",
+          "additionalProperties": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        },
+        {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/jsonValue"
+          }
+        }
+      ]
+    },
+    "noulCriteria": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "true": {
+          "$ref": "#/$defs/content"
+        },
+        "false": {
+          "$ref": "#/$defs/content"
+        }
+      }
+    },
+    "noul": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type"
+      ],
+      "description": "A yes/no judgment. Supply instructions or at least one outcome description.",
+      "properties": {
+        "type": {
+          "const": "noul"
+        },
+        "instructions": {
+          "$ref": "#/$defs/content"
+        },
+        "criteria": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/noulCriteria"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      },
+      "anyOf": [
+        {
+          "required": [
+            "instructions"
+          ],
+          "properties": {
+            "instructions": {
+              "not": {
+                "type": "null"
+              }
+            }
+          }
+        },
+        {
+          "required": [
+            "criteria"
+          ],
+          "properties": {
+            "criteria": {
+              "allOf": [
+                {
+                  "$ref": "#/$defs/noulCriteria"
+                },
+                {
+                  "anyOf": [
+                    {
+                      "required": [
+                        "true"
+                      ],
+                      "properties": {
+                        "true": {
+                          "not": {
+                            "type": "null"
+                          }
+                        }
+                      }
+                    },
+                    {
+                      "required": [
+                        "false"
+                      ],
+                      "properties": {
+                        "false": {
+                          "not": {
+                            "type": "null"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "jevChoice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "criteria"
+      ],
+      "properties": {
+        "type": {
+          "const": "choice"
+        },
+        "instructions": {
+          "$ref": "#/$defs/content"
+        },
+        "criteria": {
+          "type": "object",
+          "minProperties": 2,
+          "maxProperties": 255,
+          "propertyNames": {
+            "$ref": "#/$defs/text"
+          },
+          "additionalProperties": {
+            "$ref": "#/$defs/content"
+          },
+          "description": "Option values are the string keys; descriptions may be structured JSON or null."
+        }
+      }
+    },
+    "jevScore": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "criteria"
+      ],
+      "properties": {
+        "type": {
+          "const": "score"
+        },
+        "instructions": {
+          "$ref": "#/$defs/content"
+        },
+        "criteria": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 10,
+          "items": {
+            "$ref": "#/$defs/content"
+          },
+          "description": "Level descriptions ordered lowest to highest. Array indices define numeric scores."
+        }
+      }
+    },
+    "nativeConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "questions"
+      ],
+      "properties": {
+        "$schema": {
+          "$ref": "#/$defs/text"
+        },
+        "version": {
+          "type": "integer",
+          "const": 1
+        },
+        "questions": {
+          "type": "array",
+          "minItems": 1,
+          "maxItems": 400,
+          "description": "Question names must be unique; checked by the consuming harness.",
+          "items": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/predicate"
+              },
+              {
+                "$ref": "#/$defs/choice"
+              },
+              {
+                "$ref": "#/$defs/score"
+              }
+            ]
+          }
+        }
+      }
+    },
+    "jevConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "questions"
+      ],
+      "properties": {
+        "$schema": {
+          "$ref": "#/$defs/text"
+        },
+        "version": {
+          "type": "integer",
+          "const": 2
+        },
+        "questions": {
+          "type": "object",
+          "minProperties": 1,
+          "maxProperties": 400,
+          "propertyNames": {
+            "$ref": "#/$defs/text"
+          },
+          "additionalProperties": {
+            "oneOf": [
+              {
+                "$ref": "#/$defs/noul"
+              },
+              {
+                "$ref": "#/$defs/jevChoice"
+              },
+              {
+                "$ref": "#/$defs/jevScore"
+              }
+            ]
+          },
+          "description": "Named questions. Each key identifies the corresponding answer."
+        }
+      }
+    }
+  }
+}

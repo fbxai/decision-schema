@@ -1,0 +1,1 @@
+The application crashes whenever I open a project. Essential work is blocked, and there is no workaround.
