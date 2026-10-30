@@ -4,6 +4,48 @@ Decision Schema provides one policy schema and a portable Markdown agent bundle.
 Read `README.md`, `CONTRIBUTING.md`, `agents/decisions/AGENTS.md`, and
 `agents/decisions/IDENTITY.md` before making changes.
 
+## Install into the current harness
+
+When the user asks to install the decision agent from this repository, including
+"install the decision agent by following the instructions in
+https://github.com/fbxai/decision-schema", carry out a clean installation for the
+harness handling that request:
+
+1. Identify the active harness from the session and its existing configuration.
+   Consult its current primary documentation for agent registration, instruction
+   loading, configuration scope, and reload requirements. Ask which harness or
+   scope only if these cannot be determined; do not guess a generic `agents/`
+   destination or assume this repository is the user's target project.
+2. Obtain a fresh checkout of the requested repository revision (the default
+   branch when unspecified), recording the commit used. Use a new directory or
+   an existing clean checkout of that revision; never reset a dirty checkout.
+   Read its README and agent instructions before installing.
+3. Install `agents/decisions/AGENTS.md` and `IDENTITY.md` together in the harness's
+   supported location. Register the decision agent through the harness's native
+   mechanism and ensure both files are loaded, with bundle-relative links
+   resolving correctly. Add only the minimal registration entry or instruction
+   adapter needed; keep the portable persona as the source of its behavior.
+   Keep `decision.schema.json` outside the persona folder and make its stable
+   local path available to the harness for offline validation.
+4. Preserve unrelated agents, settings, credentials, and policies. Inspect an
+   existing decision-agent installation before replacing it; preserve local
+   changes or report a conflict instead of overwriting them. A repeat install
+   should update the same registration without duplicate entries. Do not create
+   or migrate `.agents/decisions.json` as an installation side effect.
+5. Bind the default OpenAI Decisions endpoint and `gpt-6-luna` explicitly, or Jev
+   when requested, independently of the host model. Verify that the harness has
+   a suitable native API or approved HTTP facility and configure the credential
+   reference without reading or printing its value. Missing endpoint credentials
+   need not block installing the Markdown, but must be reported as a runtime
+   prerequisite. Follow the contracts below; do not add a bundled API client.
+6. Apply any documented reload step and check that the harness discovers the
+   agent, loads both Markdown files, and can resolve the local schema. Review an
+   unevaluated request preview for the selected binding without credentials or
+   an API call. If a check cannot run, say so. Report the source commit, installed
+   paths, registration/configuration changes, checks performed, and remaining
+   prerequisites. Distinguish installed files, verified persona loading, and
+   live endpoint execution; never claim one establishes the others.
+
 ## Contracts
 
 - Keep `agents/decisions/` portable: `AGENTS.md` describes operation,

@@ -11,12 +11,19 @@ client or separate decision engine.
 
 ## Install the persona
 
-Copy `agents/decisions/` into your harness's `agents/` directory:
+Ask your agent:
 
-```sh
-mkdir -p "/path/to/harness/agents"
-cp -R agents/decisions "/path/to/harness/agents/"
-```
+> Install the decision agent by following the instructions in https://github.com/fbxai/decision-schema.
+
+The [installation workflow in AGENTS.md](AGENTS.md#install-into-the-current-harness)
+guides the agent to identify its active harness, install and register the persona,
+preserve existing settings, and report verification results and prerequisites.
+The instructions are harness-agnostic; this repository does not provide a
+verified harness compatibility list. Your agent needs repository access and
+permission to change the harness configuration. Registration and endpoint access
+depend on that harness's capabilities.
+
+Or manually copy `agents/decisions/` into your harness's `agents/` directory.
 
 The portable bundle contains:
 
