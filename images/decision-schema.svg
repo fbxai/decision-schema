@@ -1,5 +1,9 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
   <defs>
+    <clipPath id="diamondBackground">
+      <path d="M 256,101 L 411,256 L 256,411 L 101,256 Z" />
+    </clipPath>
+
     <!-- Background Gradient -->
     <radialGradient id="bgGlow" cx="50%" cy="50%" r="65%">
       <stop offset="0%" stop-color="#14192b" />
@@ -46,9 +50,8 @@
     </filter>
   </defs>
 
-  <!-- Background Base -->
-  <rect width="512" height="512" rx="108" fill="url(#bgGlow)" />
-  <rect width="510" height="510" x="1" y="1" rx="107" fill="none" stroke="rgba(255, 255, 255, 0.06)" stroke-width="2" />
+  <!-- Keep the original background gradient inside the decision diamond. -->
+  <rect width="512" height="512" fill="url(#bgGlow)" clip-path="url(#diamondBackground)" />
 
   <!-- Outer Isometric Decision Diamond (Base Structure) -->
   <g transform="translate(256, 256)">

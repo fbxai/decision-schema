@@ -1,9 +1,13 @@
-# <img src="images/decision-schema.svg" alt="Decision Schema logo" width="40" height="40"> Decision Schema
+# Decision Schema
+
+<img src="images/decision-schema.svg" alt="Decision Schema logo" width="200" height="200" align="left">
 
 A portable Markdown agent and one JSON Schema for folder-defined decisions.
 The harness loads the persona, reads explicitly selected evidence, calls OpenAI
 Decisions or Jev, and presents the returned decision. There is no bundled API
 client or separate decision engine.
+
+<br clear="left">
 
 ## Inspect a Jira ticket
 
