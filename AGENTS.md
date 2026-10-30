@@ -1,7 +1,7 @@
 # Working in this repository
 
 Decision Schema provides one policy schema and a portable Markdown agent bundle.
-Read `README.md`, `agents/decisions/AGENTS.md`, and
+Read `README.md`, `CONTRIBUTING.md`, `agents/decisions/AGENTS.md`, and
 `agents/decisions/IDENTITY.md` before making changes.
 
 ## Contracts
@@ -80,8 +80,10 @@ Previews need no credentials and must be clearly marked as unevaluated.
 
 ## Publishing
 
-The root `decision.schema.json` uses internal references and can be published as
-one file. Its `$id` and the policy examples' `$schema` use
+The root `decision.schema.json` has local `$ref` pointers into its `$defs` and can
+be published as one file. See `CONTRIBUTING.md` for the distinction between the
+dialect, identifier, and definition references. Its `$id` and the policy examples'
+`$schema` use
 `https://github.com/fbxai/decision-schema/decision.schema.json`. Retain the Draft
 2020-12 meta-schema in the schema's own `$schema` field. Load the root schema
 directly in offline tests; the identifier does not require a remote lookup during

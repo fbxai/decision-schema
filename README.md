@@ -9,41 +9,6 @@ client or separate decision engine.
 
 <br clear="left">
 
-## Inspect a Jira ticket
-
-A user asks:
-
-> Launch my decision agent to inspect Jira ticket EXAMPLE-123.
-
-The harness loads the Decision Schema persona. The agent reads the folder's
-`.agents/decisions.json`, fetches the requested ticket through the authorized Jira
-connector, and submits its selected evidence and questions to the configured
-decision endpoint. The actual response returns to the harness, which displays
-the category, confidence, and probabilities and retains the full JSON result.
-The agent does not assign or modify the ticket unless the calling workflow
-separately requests that action.
-
-The [Jira triage policy](examples/jira-triage.decisions.json) defines one choice:
-
-| Choice | Work needed |
-| --- | --- |
-| `infrastructure` | Compute, networking, storage, deployment, or CI infrastructure |
-| `software` | Application or library behavior, bugs, or features |
-| `docs` | Documentation, guides, examples, or reference material |
-
-To use this example, run from the caller's project folder and replace the source
-path with your checkout location:
-
-```sh
-mkdir -p .agents
-cp "/path/to/decision-schema/examples/jira-triage.decisions.json" .agents/decisions.json
-```
-
-The user supplies the ticket reference; no evidence file or helper-script command
-is required. If the harness lacks Jira access, report that limitation instead of
-inventing ticket content. A preview constructs the request without credentials
-or network access and is explicitly unevaluated.
-
 ## Install the persona
 
 Copy `agents/decisions/` into your harness's `agents/` directory:
@@ -55,10 +20,10 @@ cp -R agents/decisions "/path/to/harness/agents/"
 
 The portable bundle contains:
 
-| File | Purpose |
-| --- | --- |
-| [AGENTS.md](agents/decisions/AGENTS.md) | Policy discovery, endpoint requests, and result handling |
-| [IDENTITY.md](agents/decisions/IDENTITY.md) | Decision specialist persona |
+| File                                        | Purpose                                                  |
+| ------------------------------------------- | -------------------------------------------------------- |
+| [AGENTS.md](agents/decisions/AGENTS.md)     | Policy discovery, endpoint requests, and result handling |
+| [IDENTITY.md](agents/decisions/IDENTITY.md) | Decision specialist persona                              |
 
 Register or load both Markdown files using your harness's supported mechanism;
 copying this folder alone does not register an agent in every harness.
@@ -86,9 +51,9 @@ The bundle's [operating instructions](agents/decisions/AGENTS.md) contain full
 request examples and response handling rules. Use the selected policy questions
 and caller-selected evidence, without sending `version` or `$schema` metadata.
 
-| Policy | Endpoint | Request fields | Native answer structure |
-| --- | --- | --- | --- |
-| Version 1 | OpenAI `POST /v1/decisions` | `model: gpt-6-luna`, text `input`, `questions` array | `answers` array, matched by `name` |
+| Policy    | Endpoint                      | Request fields                                           | Native answer structure                 |
+| --------- | ----------------------------- | -------------------------------------------------------- | --------------------------------------- |
+| Version 1 | OpenAI `POST /v1/decisions`   | `model: gpt-6-luna`, text `input`, `questions` array     | `answers` array, matched by `name`      |
 | Version 2 | TypeSafe `POST /v1/systemone` | Harness-selected Jev `model`, `state`, named `questions` | `answers` object keyed by question name |
 
 Both use JSON and bearer authentication. Direct OpenAI requests use
@@ -101,34 +66,6 @@ thresholds or take actions selected by an answer.
 See the [OpenAI Decisions reference](https://developers.openai.com/api/reference/resources/decisions/methods/create)
 and [TypeSafe System One reference](https://docs.typesafe.ai/api/system-one).
 
-## Harness cross-check
-
-Primary documentation and source reviewed on 2026-10-29 show these integration
-paths. These are documented capabilities, not live verification of an installed
-harness or account.
-
-| Harness | Existing decision integration |
-| --- | --- |
-| Hermes | An optional community plugin exposes [`jev_evaluate`](https://hermes-agent.nousresearch.com/docs/plugins/jev). It is separate from the host chat provider. |
-| OMP | Native [`typesafe` and `openai-decisions` judgment APIs](https://github.com/can1357/oh-my-pi/blob/main/docs/models.md) use the `judge` model role. |
-| Pi | Native [`models.classify()`](https://pi.dev/docs/latest/models#use-classifier-models) supports Jev and GPT-6 Luna through enabled codemode; extensions can use the model registry. |
-| OpenCode | The v2 plugin API exposes experimental [`ctx.experimental.generate.decisions()`](https://opencode.ai/v2/docs/build/plugins/server/). This is a plugin API, not automatic execution from Markdown. |
-
-Use a native interface when its semantics and returned data meet the contract.
-For example, [Pi's documented classifier types](https://pi.dev/docs/latest/codemode#classify)
-use `bool` rather than `noul`, normalize usage, and omit score distributions.
-Do not pass the policy through blindly or claim that normalized output preserves
-the complete upstream response. Use direct HTTP through an authorized runtime
-when the native path cannot retain required fields. Choose the invocation path
-before evaluation; do not retry failures through another provider.
-
-Registration also differs: Hermes uses [context files and SOUL.md](https://hermes-agent.nousresearch.com/docs/user-guide/configuration#context-files-soulmd-agentsmd),
-OMP has [Markdown subagent definitions](https://omp.sh/docs/subagent-authoring),
-Pi loads [context files and prompt resources](https://pi.dev/docs/latest/configuration),
-and OpenCode has [its own Markdown agent locations](https://opencode.ai/docs/agents/#markdown).
-The `agents/decisions/` folder is our portable source bundle, not a universal
-native registration convention.
-
 ## Policy definitions
 
 The single schema validates authoring policies, not API responses, and provides
@@ -138,11 +75,11 @@ invocation. Its `$schema` reference helps editors; it does not select a provider
 Version 1 has 1–400 entries in a `questions` array, each with a unique `name`,
 `type`, and nonempty `instructions`:
 
-| Type | Definition | Answer |
-| --- | --- | --- |
-| `predicate` | A condition | Probability from 0 to 1 |
-| `choice` | 2–255 typed values with descriptions | Selected value, probabilities, confidence |
-| `score` | 2–10 ordered labels with descriptions | Weighted zero-based level index, probabilities, confidence |
+| Type        | Definition                            | Answer                                                     |
+| ----------- | ------------------------------------- | ---------------------------------------------------------- |
+| `predicate` | A condition                           | Probability from 0 to 1                                    |
+| `choice`    | 2–255 typed values with descriptions  | Selected value, probabilities, confidence                  |
+| `score`     | 2–10 ordered labels with descriptions | Weighted zero-based level index, probabilities, confidence |
 
 Boolean `true` and string `"true"` are distinct choices. Scores may be fractional:
 three levels produce a score in [0, 2]. The harness must check unique question
@@ -176,22 +113,11 @@ separate retention when callers use them. Never migrate policies as a side effec
 of inspecting a ticket. Pin a model version when reproducibility matters; consult
 the current [TypeSafe model reference](https://docs.typesafe.ai/models).
 
-## Development and publishing
+## Contributing
 
-Schema tests use `jsonschema` in an isolated `uv` environment:
+See [CONTRIBUTING.md](CONTRIBUTING.md) for testing, debugging, and schema publishing.
 
-```sh
-uv run --with jsonschema python -B -m unittest discover -s tests -t . -v
-```
+## References
 
-Tests are offline and require no API key. They validate the schema and policy
-examples; they do not establish that a particular harness loaded the persona,
-made an API request, or has model access. Review Markdown links, request examples,
-and registration claims when changing the persona. Keep test inputs synthetic.
-
-The root schema uses Draft 2020-12 and internal references, so it can be published
-as one file. Its `$id` matches the schema identifier in the policy examples.
-The schema's own `$schema` remains the Draft 2020-12 meta-schema. Tests load the
-root file directly and never fetch the identifier URL; publishing is separate
-from local validation. Update `$id` and policy references together if adopting
-a release-specific identifier later.
+- [OpenAI Decisions API](https://developers.openai.com/api/docs/guides/decisions)
+- [TypeSafe Jev Primitives](https://docs.typesafe.ai/introduction)
